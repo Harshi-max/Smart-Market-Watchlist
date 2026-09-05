@@ -75,11 +75,10 @@ function SignalFeed() {
           </div>
           <span className="font-mono text-xs text-slate-300">{sig.symbol}</span>
         </div>
-        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-          sig.level === "HIGH" ? "bg-rose-500/15 text-rose-400" :
-          sig.level === "MOD" ? "bg-amber-500/15 text-amber-400" :
-          "bg-slate-500/15 text-slate-400"
-        }`}>{sig.level} · {sig.score}/100</span>
+        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${sig.level === "HIGH" ? "bg-rose-500/15 text-rose-400" :
+            sig.level === "MOD" ? "bg-amber-500/15 text-amber-400" :
+              "bg-slate-500/15 text-slate-400"
+          }`}>{sig.level} · {sig.score}/100</span>
       </div>
       <p className="text-[11px] text-slate-400 leading-relaxed">{sig.text}</p>
       <div className="h-1 rounded-full bg-white/5 overflow-hidden">
@@ -140,7 +139,7 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
   }, [searchParams]);
 
   useEffect(() => {
-    fetch("/api/auth/session")
+    fetch("/api/auth/session", { credentials: "same-origin" })
       .then((res) => res.json())
       .then((result: { authenticated?: boolean }) => {
         if (result.authenticated) router.replace("/dashboard");
@@ -188,6 +187,7 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
     const res = await fetch("/api/auth/credentials", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ action: mode, email, password, name }),
     });
     const data = (await res.json().catch(() => null)) as { error?: string; name?: string } | null;
@@ -322,11 +322,10 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
               <button
                 type="button"
                 onClick={() => setMethod("email")}
-                className={`py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${
-                  method === "email"
+                className={`py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${method === "email"
                     ? "bg-[#5c9aff] text-white shadow-lg shadow-[#5c9aff]/25"
                     : "text-slate-400 hover:text-white"
-                }`}
+                  }`}
               >
                 <Mail size={12} />
                 <span>Email OTP</span>
@@ -334,11 +333,10 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
               <button
                 type="button"
                 onClick={() => setMethod("password")}
-                className={`py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${
-                  method === "password"
+                className={`py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${method === "password"
                     ? "bg-[#5c9aff] text-white shadow-lg shadow-[#5c9aff]/25"
                     : "text-slate-400 hover:text-white"
-                }`}
+                  }`}
               >
                 <LockKeyhole size={12} />
                 <span>Password</span>
@@ -418,8 +416,8 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
                   {loading
                     ? method === "password" ? "Signing in..." : "Sending OTP..."
                     : method === "password"
-                    ? mode === "login" ? "Sign In" : "Create Account"
-                    : "Send 6-Digit OTP"}
+                      ? mode === "login" ? "Sign In" : "Create Account"
+                      : "Send 6-Digit OTP"}
                 </span>
                 <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
               </button>

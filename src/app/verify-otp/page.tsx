@@ -49,11 +49,10 @@ function OtpBoxInput({ value, onChange }: { value: string; onChange: (val: strin
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKey(i, e)}
           onFocus={(e) => e.target.select()}
-          className={`w-11 h-14 text-center text-xl font-bold font-mono rounded-xl border transition-all duration-200 outline-none ${
-            digits[i]
-              ? "bg-[#5c9aff]/15 border-[#5c9aff]/60 text-white"
-              : "bg-white/[0.04] border-white/[0.1] text-white focus:border-[#5c9aff]/60 focus:bg-white/[0.07]"
-          }`}
+          className={`w-11 h-14 text-center text-xl font-bold font-mono rounded-xl border transition-all duration-200 outline-none ${digits[i]
+            ? "bg-[#5c9aff]/15 border-[#5c9aff]/60 text-white"
+            : "bg-white/[0.04] border-white/[0.1] text-white focus:border-[#5c9aff]/60 focus:bg-white/[0.07]"
+            }`}
         />
       ))}
     </div>
@@ -114,8 +113,7 @@ function VerifyOtpContent() {
   const [countdown, setCountdown] = useState(60);
   const [resending, setResending] = useState(false);
   const [currentDevCode, setCurrentDevCode] = useState(devCode);
-  const [showTransition, setShowTransition] = useState(false);
-  const [userName, setUserName] = useState("Investor");
+  // Removed transition overlay state; navigation is handled directly
   const [liveTime, setLiveTime] = useState("");
 
   useEffect(() => {
@@ -144,7 +142,8 @@ function VerifyOtpContent() {
           const res = await fetch("/api/auth/otp", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ identifier, type: "email", code: otp }),
+            credentials: "same-origin",
+            body: JSON.stringify({ identifier: identifier.trim().toLowerCase(), type: "email", code: otp }),
           });
           const data = (await res.json().catch(() => null)) as {
             authenticated?: boolean;
@@ -152,8 +151,8 @@ function VerifyOtpContent() {
             error?: string;
           } | null;
           if (res.ok && data?.authenticated) {
-            setUserName(data.user?.name || identifier.split("@")[0] || "Investor");
-            setShowTransition(true);
+            // Directly navigate to dashboard after successful authentication
+            router.replace("/dashboard");
           } else {
             setMessage(data?.error || "Verification failed. Check your code and try again.");
           }
@@ -173,7 +172,8 @@ function VerifyOtpContent() {
       const res = await fetch("/api/auth/otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier, type: "email" }),
+        credentials: "same-origin",
+        body: JSON.stringify({ identifier: identifier.trim().toLowerCase(), type: "email" }),
       });
       const data = (await res.json().catch(() => null)) as { developmentCode?: string; error?: string } | null;
       if (res.ok) {
@@ -200,13 +200,7 @@ function VerifyOtpContent() {
 
   return (
     <>
-      {showTransition && (
-        <AuthTransitionOverlay
-          userName={userName}
-          onComplete={() => router.replace("/dashboard")}
-        />
-      )}
-
+      {/* Transition overlay removed – direct navigation now occurs after OTP verification */}
       <main className="min-h-screen bg-[#04060d] text-[#cbd5e1] flex flex-col lg:flex-row overflow-hidden">
         {/* Left Panel */}
         <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden bg-gradient-to-br from-[#080e1f] via-[#060c1a] to-[#030508]">
@@ -346,11 +340,10 @@ function VerifyOtpContent() {
 
             {/* Error / success message */}
             {message && (
-              <div className={`p-3.5 rounded-xl text-xs flex items-start gap-2 ${
-                message.startsWith("✓")
-                  ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300"
-                  : "bg-rose-500/10 border border-rose-500/20 text-rose-300"
-              }`}>
+              <div className={`p-3.5 rounded-xl text-xs flex items-start gap-2 ${message.startsWith("✓")
+                ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300"
+                : "bg-rose-500/10 border border-rose-500/20 text-rose-300"
+                }`}>
                 <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
                 <span>{message}</span>
               </div>

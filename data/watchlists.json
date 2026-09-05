@@ -82,5 +82,23 @@
       }
     ],
     "lastViewedAt": "2026-09-04T16:26:13.799Z"
+  },
+  "harshithaarava31@gmail.com": {
+    "userId": "harshithaarava31@gmail.com",
+    "defaultWatchlistId": "watchlist-1",
+    "watchlists": [
+      {
+        "id": "watchlist-1",
+        "name": "My Watchlist",
+        "items": [
+          {
+            "symbol": "TCS",
+            "addedAt": "2026-09-05T16:32:05.177Z",
+            "lastViewedAt": "2026-09-05T16:32:05.177Z"
+          }
+        ]
+      }
+    ],
+    "lastViewedAt": "2026-09-05T16:32:05.177Z"
   }
 }
