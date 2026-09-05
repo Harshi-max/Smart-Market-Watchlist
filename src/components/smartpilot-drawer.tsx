@@ -43,9 +43,9 @@ function loadSpeechVoices() {
   });
 }
 
-export default function SmartPilotDrawer({ onClose }: { onClose: () => void }) {
+export default function SmartPilotDrawer({ onClose, initialQuestion }: { onClose: () => void; initialQuestion?: string }) {
   const [language, setLanguage] = useState<Language>("en");
-  const [question, setQuestion] = useState("");
+  const [question, setQuestion] = useState(initialQuestion || "");
   const [answer, setAnswer] = useState<PilotAnswer>(fallback);
   const [voiceState, setVoiceState] = useState<"idle" | "listening" | "processing" | "speaking" | "stopped" | "error">("idle");
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -53,7 +53,32 @@ export default function SmartPilotDrawer({ onClose }: { onClose: () => void }) {
   const recognitionRef = useRef<SpeechRecognizer | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { void fetch("/api/preferences").then((response) => response.json()).then((data: { preferredLanguage?: Language }) => { if (data.preferredLanguage && supportedLanguages.includes(data.preferredLanguage)) setLanguage(data.preferredLanguage); }).catch(() => undefined); const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { controllerRef.current?.abort(); recognitionRef.current?.stop(); window.speechSynthesis?.cancel(); setVoiceState("stopped"); } }; window.addEventListener("keydown", onKey); return () => { window.removeEventListener("keydown", onKey); controllerRef.current?.abort(); recognitionRef.current?.stop(); window.speechSynthesis?.cancel(); }; }, []);
+  useEffect(() => {
+    void fetch("/api/preferences").then((response) => response.json()).then((data: { preferredLanguage?: Language }) => {
+      if (data.preferredLanguage && supportedLanguages.includes(data.preferredLanguage)) setLanguage(data.preferredLanguage);
+    }).catch(() => undefined);
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        controllerRef.current?.abort();
+        recognitionRef.current?.stop();
+        window.speechSynthesis?.cancel();
+        setVoiceState("stopped");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+
+    if (initialQuestion) {
+      void ask(initialQuestion);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      controllerRef.current?.abort();
+      recognitionRef.current?.stop();
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
   const selectLanguage = (next: Language) => { setLanguage(next); setLanguageOpen(false); void fetch("/api/preferences", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ preferredLanguage: next }) }); };
   const speak = async (text: string, speechLanguage: Language = language) => { if (!("speechSynthesis" in window)) { setVoiceState("idle"); return; } window.speechSynthesis.cancel(); const voices = await loadSpeechVoices(); const preferredVoice = pickBestVoice(speechLanguage, voices); if (speechLanguage !== "en" && !preferredVoice) { setVoiceState("error"); return; } const utterance = new SpeechSynthesisUtterance(text); utterance.lang = LANGUAGE_CONFIG[speechLanguage].speechSynthesis; if (preferredVoice) utterance.voice = preferredVoice; utterance.onstart = () => setVoiceState("speaking"); utterance.onend = () => setVoiceState("idle"); utterance.onerror = () => setVoiceState("error"); window.speechSynthesis.speak(utterance); };
   const stopAll = () => { controllerRef.current?.abort(); controllerRef.current = null; recognitionRef.current?.stop(); recognitionRef.current = null; window.speechSynthesis?.cancel(); setVoiceState("stopped"); };
