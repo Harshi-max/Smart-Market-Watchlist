@@ -1,0 +1,4 @@
+import WatchlistManager from "@/components/watchlist-manager";
+import Link from "next/link";
+
+export default function WatchlistPage() { return <main className="feature-shell"><header className="feature-topbar"><Link className="back-button" href="/dashboard">Overview</Link><Link className="feature-pilot" href="/smartpilot">Ask SmartPilot</Link></header><section className="feature-content"><div className="feature-heading"><div><span className="eyebrow">YOUR UNIVERSE</span><h1>My watchlist</h1><p>Create a private list, track the latest market context, and return later to see what changed.</p></div></div><div className="feature-status"><span><span className="status-dot" /> Data freshness is shown per stock</span><strong>Observed market data</strong></div><WatchlistManager /></section></main>; }
