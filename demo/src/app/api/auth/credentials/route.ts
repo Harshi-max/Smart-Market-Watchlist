@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const password = typeof body?.password === "string" ? body.password : "";
   const name = typeof body?.name === "string" ? body.name.trim() : "";
   if (!emailPattern.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
-  if (password.length < 8) return NextResponse.json({ error: "Use a password with at least 8 characters." }, { status: 400 });
+  if (!password) return NextResponse.json({ error: "Password cannot be empty." }, { status: 400 });
 
   if (action === "signup") {
     if (!name) return NextResponse.json({ error: "Enter your name." }, { status: 400 });
