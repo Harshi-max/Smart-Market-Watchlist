@@ -172,6 +172,8 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
       const MOCK_EMAIL = "demo@example.com";
       const MOCK_PASSWORD = "demo123";
       if (email === MOCK_EMAIL && password === MOCK_PASSWORD) {
+        // Set a dummy session cookie so the middleware treats the user as authenticated in production
+        document.cookie = "smartpilot_session=demo; path=/; max-age=3600; SameSite=Lax";
         setAuthenticatedName(name || email.split("@")[0] || "Investor");
         router.replace("/dashboard");
         setLoading(false);
