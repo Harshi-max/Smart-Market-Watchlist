@@ -173,7 +173,7 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
       const MOCK_PASSWORD = "demo123";
       if (email === MOCK_EMAIL && password === MOCK_PASSWORD) {
         setAuthenticatedName(name || email.split("@")[0] || "Investor");
-        router.replace("/dashboard?auth=success");
+        router.replace("/dashboard");
         setLoading(false);
         return;
       } else {
