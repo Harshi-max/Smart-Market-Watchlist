@@ -106,6 +106,12 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
   const searchParams = useSearchParams();
 
   const method = "password"; // fixed method for demo
+  // Demo credentials handler
+  const handleDemoLogin = () => {
+    setEmail("demo@example.com");
+    setPassword("demo123");
+    setName("Demo User");
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -161,6 +167,22 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
       return;
     }
     setLoading(true);
+    if (mode === "login") {
+      // Mock credentials for demo
+      const MOCK_EMAIL = "demo@example.com";
+      const MOCK_PASSWORD = "demo123";
+      if (email === MOCK_EMAIL && password === MOCK_PASSWORD) {
+        setAuthenticatedName(name || email.split("@")[0] || "Investor");
+        router.replace("/dashboard?auth=success");
+        setLoading(false);
+        return;
+      } else {
+        setMessage("Invalid demo credentials. Use demo@example.com / demo123.");
+        setLoading(false);
+        return;
+      }
+    }
+    // Fallback to real API for signup or other actions
     const res = await fetch("/api/auth/credentials", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -337,6 +359,12 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
                     Password
                   </label>
                   <div className="relative">
+      {/* Demo credentials button */}
+      <div className="text-center mt-2 mb-2">
+        <button type="button" onClick={handleDemoLogin} className="text-[#5c9aff] underline">
+          Use demo credentials
+        </button>
+      </div>
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
