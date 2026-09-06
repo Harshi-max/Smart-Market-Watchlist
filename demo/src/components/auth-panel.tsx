@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState, Suspense } from "react";
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles, AlertCircle, Eye, EyeOff, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { ArrowRight, LockKeyhole, ShieldCheck, Sparkles, AlertCircle, Eye, EyeOff, TrendingUp, TrendingDown, Activity } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import AuthTransitionOverlay from "@/components/auth-transition-overlay";
@@ -105,7 +105,7 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [method, setMethod] = useState<"email" | "password">("password");
+  const method = "password"; // fixed method for demo
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -151,29 +151,6 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
     event.preventDefault();
     setMessage("");
 
-    if (method === "email") {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-        setMessage("Please enter a valid email address.");
-        return;
-      }
-      setLoading(true);
-      const res = await fetch("/api/auth/otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email.trim(), type: "email" }),
-      });
-      const data = (await res.json().catch(() => null)) as { developmentCode?: string; error?: string } | null;
-      if (res.ok) {
-        const params = new URLSearchParams({ identifier: email.trim(), type: "email" });
-        if (data?.developmentCode) params.set("devCode", data.developmentCode);
-        router.push(`/verify-otp?${params.toString()}`);
-      } else {
-        setMessage(data?.error || "Authentication service temporarily unavailable. Please try again.");
-      }
-      setLoading(false);
-      return;
-    }
-
     // Password credentials
     if (!email.trim()) {
       setMessage("Please enter your email address.");
@@ -193,7 +170,7 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
     const data = (await res.json().catch(() => null)) as { error?: string; name?: string } | null;
     if (res.ok) {
       setAuthenticatedName(data?.name || name || email.split("@")[0] || "Investor");
-      setShowTransition(true);
+      router.replace("/dashboard?auth=success");
     } else {
       setMessage(data?.error || "Authentication service temporarily unavailable. Please try again.");
     }
@@ -308,7 +285,7 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
                 {mode === "login" ? "WELCOME BACK" : "GET STARTED"}
               </span>
               <h2 className="text-3xl font-black text-white tracking-tight">
-                {mode === "login" ? "Sign in to SmartPilot." : "Build your watchlist."}
+                {/* Method Tabs removed for demo: only password login is supported */}
               </h2>
               <p className="text-xs text-slate-500">
                 {mode === "login"
@@ -317,31 +294,6 @@ function AuthPanelContent({ mode = "login" }: { mode?: "login" | "signup" }) {
               </p>
             </div>
 
-            {/* Method Tabs — Email OTP vs Password */}
-            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.07]">
-              <button
-                type="button"
-                onClick={() => setMethod("email")}
-                className={`py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${method === "email"
-                    ? "bg-[#5c9aff] text-white shadow-lg shadow-[#5c9aff]/25"
-                    : "text-slate-400 hover:text-white"
-                  }`}
-              >
-                <Mail size={12} />
-                <span>Email OTP</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setMethod("password")}
-                className={`py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${method === "password"
-                    ? "bg-[#5c9aff] text-white shadow-lg shadow-[#5c9aff]/25"
-                    : "text-slate-400 hover:text-white"
-                  }`}
-              >
-                <LockKeyhole size={12} />
-                <span>Password</span>
-              </button>
-            </div>
 
             {/* Form */}
             <form onSubmit={submit} className="space-y-4">
